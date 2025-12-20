@@ -66,6 +66,48 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Blog",
+        "groups": [
+          {
+            "group": "Featured",
+            "pages": [
+              "blog/meta-ai-engineer-validation",
+              "blog/how-we-review-agent-prs",
+              "blog/temporal-coupling-achilles-heel",
+              "blog/context-engineering-not-prompt-engineering"
+            ]
+          },
+          {
+            "group": "Architecture & Systems",
+            "pages": [
+              "blog/receipts-first-governance",
+              "blog/long-running-agents",
+              "blog/agent-orchestration-workloads",
+              "blog/agentic-distributed-systems",
+              "blog/context-management-multi-agent",
+              "blog/dag-parallelization-problem"
+            ]
+          },
+          {
+            "group": "Governance & Operations",
+            "pages": [
+              "blog/security-observability-governance",
+              "blog/code-review-liquidity-crisis",
+              "blog/closing-the-loop-artifacts"
+            ]
+          },
+          {
+            "group": "Comparisons & Insights",
+            "pages": [
+              "blog/bakeoff-claude-code-squad-cursor",
+              "blog/six-limitations-claude-code-squad-solves",
+              "blog/dogfooding-squad-with-primitive-squad",
+              "blog/reinforcement-learning-multi-agent"
+            ]
+          }
+        ]
       }
     ],
     "global": {

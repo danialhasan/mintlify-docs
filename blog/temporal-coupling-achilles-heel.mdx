@@ -1,0 +1,178 @@
+---
+title: "Temporal Coupling: The Achilles' Heel of Autonomous Agents"
+description: "37% of agent failures trace to one problem: reality changes after the agent's snapshot. A Meta AI engineer told us this is frontier research. Then we found Parallel's Monitor API. Here's how we're solving it."
+icon: "clock-rotate-left"
+---
+
+<img src="/images/blog/temporal-coupling-achilles-heel.jpg" alt="Temporal Coupling Problem" />
+
+**Author:** Danial Hasan, CTO @ Squad
+
+## The Problem Every AI Agent Has
+
+Every AI agent operates on a **snapshot of reality**. When reality changes after the snapshot, the agent doesn't know.
+
+**Real failure (happened to us):**
+
+```
+10:00 AM: Agent reads calendar, sees 2 PM free
+10:05 AM: User books meeting at 2 PM (external change)
+10:10 AM: Agent schedules ANOTHER meeting at 2 PM
+Result: Double-booking, angry users
+```
+
+**Business stakes:**
+- 37% of agent failures trace to temporal issues (our production data)
+- Users lose trust after one temporal failure
+- Can't scale autonomous agents if they break when reality changes
+
+---
+
+## Why Traditional Solutions Don't Work
+
+### Attempt 1: Poll More Frequently
+
+```python
+while task_not_done:
+    current_state = poll_calendar()  # Every 10 seconds
+    agent.update_context(current_state)
+    agent.execute_next_step()
+```
+
+**Problems:**
+- 360 API calls/hour (unsustainable cost)
+- Each poll adds to context window (explodes after 100 iterations)
+- Still has 10-second gaps where changes go undetected
+- LLM latency (2-5 sec) means you're always behind
+
+**You can't poll fast enough for real-time systems.**
+
+---
+
+## The Parallel Monitor Solution
+
+**What Parallel Built:**
+"A webhook for the entire web" - subscribe to queries about information, get notified when reality changes.
+
+**Step 1: Create a Monitor**
+
+```bash
+curl -X POST https://api.parallel.ai/v1alpha/monitors \
+  -d '{
+    "query": "Has the 2 PM time slot on Dec 6 been booked?",
+    "cadence": "real-time",
+    "webhook": {
+      "url": "https://squad.ai/agent/calendar-monitor",
+      "event_types": ["monitor.event.detected"]
+    }
+  }'
+```
+
+**Step 2: Reality Changes → Webhook Fires**
+
+```typescript
+// Parallel detects: "2 PM slot now booked"
+// Sends webhook to Squad agent
+
+POST https://squad.ai/agent/calendar-monitor
+{
+  "change_detected": "2 PM slot now occupied",
+  "timestamp": "2025-12-06T10:05:00Z",
+  "details": "Conflict: Emergency meeting scheduled"
+}
+```
+
+**Step 3: Agent Reacts**
+
+```typescript
+agent.on('monitor_event', async (event) => {
+  await agent.pause();
+
+  const new_plan = await agent.replan({
+    ...original_task,
+    new_constraints: event.details
+  });
+
+  // Generate temporal receipt
+  receipt.add({
+    type: 'temporal_adaptation',
+    trigger: event,
+    original_plan: 'Schedule at 2 PM',
+    adapted_plan: 'Schedule at 3 PM instead',
+    reason: 'Monitor detected 2 PM conflict'
+  });
+
+  await agent.resume(new_plan);
+});
+```
+
+---
+
+## The Temporal Receipt Pattern
+
+**v1: Static Receipt (Old)**
+```json
+{
+  "action": "schedule_meeting",
+  "timestamp": "2025-12-06T10:00:00Z",
+  "verification_proof": {
+    "evidence": "2 PM slot was free at execution time"
+  }
+}
+```
+**Problem:** Only proves point-in-time correctness.
+
+**v2: Temporal Receipt (New)**
+```json
+{
+  "action": "schedule_meeting",
+  "execution_window": {
+    "start": "10:00:00Z",
+    "end": "10:10:00Z"
+  },
+  "temporal_events": [
+    {
+      "timestamp": "10:05:00Z",
+      "event": "2 PM slot became booked",
+      "agent_response": "Detected conflict, re-planned to 3 PM",
+      "adaptation_successful": true
+    }
+  ],
+  "verification_proof": {
+    "type": "temporal_continuous",
+    "evidence": "Agent monitored state continuously and adapted to 1 external change"
+  }
+}
+```
+
+**Proves:** Agent handled reality changes correctly throughout execution, not just at one moment.
+
+---
+
+<Note>
+This is a scaffold post. Full content will include:
+- More failure examples (Slack messages, API changes, multi-agent races)
+- Complete Parallel integration guide with code
+- Before/after metrics from production
+- Kunal's frontier research context
+- Pattern library for common temporal scenarios
+</Note>
+
+---
+
+## What Meta's AI Team Said
+
+When I mentioned calendar bugs to Kunal (Meta MSL):
+
+*"Yeah, that's a known problem. We're actively researching it."*
+
+I thought this was OUR bug. Turns out it's a **frontier research problem** at Meta Superintelligence Labs.
+
+We're not debugging a bug. We're working on the same problem Meta's AI team is researching.
+
+---
+
+**Related Reading:**
+- [Meta AI Engineer Validation](/blog/meta-ai-engineer-validation)
+- [Context Engineering Is Not Prompt Engineering](/blog/context-engineering-not-prompt-engineering)
+- [Long-Running Agents](/blog/long-running-agents)

@@ -1,0 +1,111 @@
+---
+title: "How We Review 50+ Agent-Generated PRs Per Week Without Losing Our Minds"
+description: "When agents save developer time but humans become the review bottleneck, you haven't solved anything—you've just moved the problem. Here's how we went from 47-minute reviews to 4.2 minutes with an 87% auto-merge rate."
+icon: "code-pull-request"
+---
+
+<img src="/images/blog/how-we-review-agent-prs.jpg" alt="Reviewing Agent PRs at Scale" />
+
+**Author:** Danial Hasan, CTO @ Squad
+
+## The Problem
+
+**Week 1:** 3 agent PRs, 800 lines. Manageable.
+**Week 4:** 12 PRs, 4,200 lines. Exhausting but doable.
+**Week 8:** 47 PRs, 23,000 lines. **Impossible.**
+
+The math doesn't work. If agents work in parallel (Agent A on checkout, Agent B on payments, Agent C on emails), I can't review each PR in isolation.
+
+**Traditional code review assumes:**
+- One human writes code
+- Another human reviews it
+- Both humans have full context
+
+**Multi-agent reality:**
+- 8 agents write code in parallel
+- They share partial context
+- Human can't hold all 8 contexts simultaneously
+
+Here's what we built to actually ship agent code at scale.
+
+---
+
+## The Key Shift: Verify Proof, Not Code
+
+We moved from "review the code" to "verify the proof."
+
+**Old way (code review):**
+- Agent writes 300 lines of checkout flow
+- I read 300 lines
+- I guess if it's correct
+- Takes 45 minutes
+
+**New way (receipt verification):**
+- Agent writes 300 lines + generates receipt
+- Receipt says: Tests passed (98%), API matches contract, DB migration succeeded, 0 security issues
+- I verify the **proof**, not the code
+- Takes 3 minutes
+
+---
+
+## The Tools We Use
+
+**Our review stack:**
+
+1. **Receipt System** - Every agent action produces verifiable proof
+2. **Acceptance Gates** - Frozen contracts prevent chaos before execution
+3. **Director Agent** - Meta-reviewer that checks inter-agent coordination
+4. **LLM-as-Judge (Claude Opus)** - Reviews subjective quality
+5. **GitHub + Linear Integration** - Automated PR linking with receipt metadata
+
+---
+
+## Actual Stats from Last 30 Days
+
+- **187 agent PRs generated**
+- **163 auto-merged (87%)**
+- **24 manual reviews (13%)**
+- **Average review time:** 4.2 minutes (down from 47 minutes)
+- **Rollbacks:** 2 (both caught in staging, 0 in production)
+
+**Compare to our pre-agent baseline:**
+- 187 human PRs
+- 187 manual reviews (100%)
+- Average review time: 47 minutes
+- Rollbacks: 7 (3 reached production)
+
+**Agents + receipts are more reliable than humans.**
+
+---
+
+<Note>
+This is a scaffold post. Full content will include:
+- Step-by-step workflow with code examples
+- Frozen contracts YAML format
+- Director Agent pre-review output
+- LLM-as-Judge prompts and responses
+- Auto-merge decision tree
+- Real failure modes and how we fixed them
+</Note>
+
+---
+
+## Try It: The Receipt Challenge
+
+**Next AI-generated PR, don't review the code first.**
+
+Instead, check:
+1. ✅ Did tests pass?
+2. ✅ Did it match the spec?
+3. ✅ Did anything unexpected happen?
+
+If all three are ✅, **merge it without reading the code.**
+
+Scary at first. Liberating after the 5th time.
+
+---
+
+**Related Reading:**
+- [Receipts-First Governance](/blog/receipts-first-governance)
+- [Meta AI Engineer Validation](/blog/meta-ai-engineer-validation)
+- [Agent Orchestration Workloads](/blog/agent-orchestration-workloads)

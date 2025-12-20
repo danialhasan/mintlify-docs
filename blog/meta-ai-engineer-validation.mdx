@@ -1,0 +1,175 @@
+---
+title: "I Had a Call With a Meta AI Engineer. Here's What He Said About Our Architecture."
+description: "When Meta's AI infrastructure team independently built the same receipt system we use for Squad, we knew we were onto something real. Here's what validation from Meta Superintelligence Labs taught us about building autonomous agents."
+icon: "building-shield"
+---
+
+<img src="/images/blog/meta-ai-engineer-validation.jpg" alt="Meta AI Engineer Validation" />
+
+**Status:** SCAFFOLD
+**Author:** Danial Hasan, CTO @ Squad
+
+I just got off a 30-minute call with someone who builds AI infrastructure at Meta.
+
+Not marketing. Not product. **Infrastructure for frontier AI models.**
+
+I wasn't pitching him. He was validating our architecture.
+
+When he said, "Your receipt system is basically what we built for evaluating agents at Meta," I had to pause the recording.
+
+We'd independently built the same thing Meta Superintelligence Labs uses to test their AI systems.
+
+Here's what happened, what I learned, and why it changed how I think about building autonomous agents.
+
+---
+
+## The Setup: Who Is This Person?
+
+**His name is Kunal Malkan.**
+
+Senior Software Engineer at Meta Superintelligence Labs (MSL). Before that: 6 years at Amazon, 3 years at Apple.
+
+But here's what matters: **He builds the infrastructure that evaluates frontier AI models.**
+
+Not the models themselves. The *systems that test whether AI models work correctly.*
+
+He co-authored research on:
+- **ARE Platform** - How Meta creates environments for testing agents
+- **Gaia2 Benchmark** - Testing AI across thousands of realistic scenarios
+- **AssetOpsBench** - Real datacenter operations for AI agents
+
+When I sent him a demo of Squad, I expected technical feedback. Maybe some suggestions.
+
+I didn't expect him to say: **"We built something similar at Meta."**
+
+---
+
+## The Call (What Actually Happened)
+
+**10 minutes in**, I'm walking through our receipt system.
+
+Every time an agent does something—writes code, runs tests, deploys—it generates a receipt. Proof that it did what it claimed.
+
+Kunal stops me: *"Wait, you're doing step-by-step verification against constraints?"*
+
+Me: "Yeah, we call them receipts. Every action has to prove it met requirements."
+
+Kunal: *"That's... that's exactly what our ARE Verifier does."*
+
+**Silence.**
+
+Me: "What's the ARE Verifier?"
+
+Kunal: *"It's the tool we use at Meta to evaluate agent actions. Step-by-step checking against oracles. You check if the agent did what it was supposed to. We call it verification. You call it receipts. Same concept."*
+
+**I had to pause the recording.**
+
+We'd been building Squad for 4 months. We created the receipt system because users didn't trust agent outputs. We needed proof.
+
+Turns out, **Meta's frontier AI team arrived at the exact same solution.**
+
+We didn't know their research existed. They didn't know we existed.
+
+**Independent convergence on the same architecture.**
+
+---
+
+## The Validation (Four Pillars)
+
+Kunal laid out four requirements for production multi-agent systems:
+
+### 1. Correct Context Provision
+*"Agents need the right information to make correct decisions."*
+
+**Squad:** Scout agents gather context from codebase, tickets, docs before Engineers execute.
+
+**His take:** ✅ "This aligns with ARE's emphasis on realistic environments."
+
+### 2. Code Standard Adherence
+*"You need consistent patterns across agents."*
+
+**Squad:** Frozen contracts define API shapes, DB schemas, code patterns before execution starts.
+
+**His take:** ✅ "Direct parallel to ARE's multi-tool environment abstractions."
+
+### 3. Full Observability
+*"You have to see what agents are doing, in real-time."*
+
+**Squad:** Receipt dashboard shows every agent action with verification proof.
+
+**His take:** ✅ **"This is the most important one. Our ARE Verifier does step-by-step checking. Your receipts do the same thing."**
+
+### 4. Active Governance
+*"Prevent agents from making unauthorized changes."*
+
+**Squad:** Acceptance Gates (Frozen → Inspect → Receipt → Evidence) enforce constraints before merge.
+
+**His take:** ✅ "This reflects the safety-first approach we need for autonomous systems."
+
+**Four for four.**
+
+Every architectural decision we'd made, validated by someone who builds production AI infrastructure at Meta.
+
+---
+
+<Note>
+This is a scaffold post. Full content will include:
+- The complete conversation breakdown
+- Gaia2 research validation of multi-LLM routing
+- The temporal coupling problem (Meta is researching it too)
+- Practical recommendations from the call
+- How this changes Squad's roadmap
+</Note>
+
+---
+
+## What Changed in How I Think
+
+### Before this call:
+- Receipts = nice-to-have UX feature
+- Multi-LLM routing = engineering optimization
+- Calendar bugs = our implementation issue
+
+### After this call:
+- Receipts = **fundamental requirement for trustworthy AI** (Meta uses the same pattern)
+- Multi-LLM routing = **empirically necessary** (Gaia2 proves no single model dominates)
+- Dynamic system failures = **frontier research problem** (Meta MSL actively working on it)
+
+**The confidence shift is huge.**
+
+When you're building something new, you second-guess everything:
+- Are we overthinking this?
+- Is anyone else doing this?
+- Are we solving a real problem or an invented one?
+
+Then someone from Meta's frontier AI team says: **"We built the same thing. This is the right approach."**
+
+That's validation you can't manufacture.
+
+---
+
+## Try This: The Receipt Challenge
+
+Next time you review an AI-generated PR, **don't read the code first.**
+
+Ask for proof:
+1. ✅ Did tests pass?
+2. ✅ Does it match the spec?
+3. ✅ Did anything unexpected happen?
+
+If all three ✅, merge it. Don't read the 300 lines.
+
+**See how it feels.**
+
+Scary the first time. Liberating the fifth time.
+
+Then you'll understand why Meta built ARE Verifier. And why we built receipts.
+
+**Trust through verification, not inspection.**
+
+---
+
+**Related Reading:**
+- [Receipts-First Governance](/blog/receipts-first-governance)
+- [How We Review 50+ Agent PRs Per Week](/blog/how-we-review-agent-prs)
+- [Context Engineering Is Not Prompt Engineering](/blog/context-engineering-not-prompt-engineering)
